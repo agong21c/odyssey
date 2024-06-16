@@ -47,15 +47,6 @@ def main():
             azure_endpoint=azure_oai_endpoint
         )
         
-        # Azure Search 클라이언트 정의
-        search_service_endpoint = os.getenv("AZURE_SEARCH_ENDPOINT")
-        search_api_key = os.getenv("AZURE_SEARCH_API_KEY")
-        search_index_name = os.getenv("AZURE_SEARCH_INDEX")
-        search_client = SearchClient(
-            endpoint=search_service_endpoint,
-            index_name=search_index_name,
-            credential=AzureKeyCredential(search_api_key)
-        )
 
         function_map = {
             "1": function1,
