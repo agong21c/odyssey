@@ -149,11 +149,10 @@ def function2(aiClient, aiModel):
 레거시 코드에 주석을 추가하고 문서를 생성하며, fibonacci.py의 함수에 대한 단위 테스트를 생성하는 함수입니다.  
 
 코드  
-```python
-def function3(aiClient, aiModel):
-    # 사용자로부터 작업 선택
-    print('작업 선택:\n1: 레거시 코드에 주석 추가 및 문서 생성\n2: fibonacci.py의 함수에 대한 5개의 단위 테스트 생성')
-    task = input('작업 번호를 입력하세요 (1 또는 2): ').strip()
+```pythondef function3(aiClient, aiModel):
+    # Get the task selection from the user
+    print('Select task:\n1: Add comments and generate documentation for legacyCode.py\n2: Generate five unit tests for fibonacci.py')
+    task = input('Enter the task number (1 or 2): ').strip()
 
     if task == '1':
         file_path = "C:\\files\\legacyCode.py"
@@ -162,7 +161,7 @@ def function3(aiClient, aiModel):
         file_path = "C:\\files\\fibonacci.py"
         prompt_task = "Please generate five unit tests for the following function in fibonacci.py."
     else:
-        print("잘못된 입력입니다. 1 또는 2를 입력하세요.")
+        print("Invalid input. Please enter 1 or 2.")
         return
 
     with open(file_path, 'r') as file:
@@ -170,12 +169,12 @@ def function3(aiClient, aiModel):
 
     inputText = f"{prompt_task}\n\n{file_content}"
 
-    # Azure OpenAI 모델에 보낼 메시지 빌드
+    # Build messages to send to Azure OpenAI model
     messages = [
         {"role": "user", "content": inputText}
     ]
 
-    # 인수 목록 정의
+    # Define argument list
     apiParams = {
         "model": aiModel,
         "messages": messages,
@@ -185,7 +184,7 @@ def function3(aiClient, aiModel):
 
     utils.writeLog("API Parameters:\n", apiParams)
 
-    # 채팅 완료 연결 호출
+    # Call chat completion connection
     response = aiClient.chat.completions.create(**apiParams)
 
     response_text = response.choices[0].message.content.strip()
@@ -193,14 +192,15 @@ def function3(aiClient, aiModel):
     utils.writeLog("Response:\n", response_text)
     print("Response: " + response_text + "\n")
     
-    # 응답을 새 파일에 작성
+    # Write the response to a new file
     output_file_path = file_path.replace(".py", "_output.py") if task == '1' else "C:\\files\\fibonacci_tests.py"
     with open(output_file_path, 'w') as output_file:
         output_file.write(response_text)
     
-    print(f"출력이 다음 위치에 작성되었습니다: {output_file_path}")
+    print(f"Output written to: {output_file_path}")
 
     return response_text
+
 ```
 
 ## 작업 4: 회사 데이터 사용
