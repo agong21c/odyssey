@@ -40,13 +40,22 @@ def main():
         azure_oai_key = os.getenv("AZURE_OPENAI_API_KEY")
         azure_oai_model = os.getenv("AZURE_OAI_MODEL")
         
-        # Azure OpenAI 클라이언트 정의
+        # Define Azure OpenAI client
         aiClient = AzureOpenAI(
             api_key=azure_oai_key,
             api_version="2023-12-01-preview",
             azure_endpoint=azure_oai_endpoint
         )
         
+        # Define Azure Search client
+        search_service_endpoint = os.getenv("AZURE_SEARCH_ENDPOINT")
+        search_api_key = os.getenv("AZURE_SEARCH_API_KEY")
+        search_index_name = os.getenv("AZURE_SEARCH_INDEX")
+        search_client = SearchClient(
+            endpoint=search_service_endpoint,
+            index_name=search_index_name,
+            credential=AzureKeyCredential(search_api_key)
+        )
 
         function_map = {
             "1": function1,
@@ -56,19 +65,19 @@ def main():
         }
 
         while True:
-            print('1: PoC 검증\n' +
-                  '2: 회사 챗봇\n' +
-                  '3: 개발자 작업\n' +
-                  '4: 회사 데이터 사용\n' +
-                  '\'quit\' 입력 시 프로그램 종료\n')
-            command = input('번호를 입력하세요:')
+            print('1: Validate PoC\n' +
+                  '2: Company chatbot\n' +
+                  '3: Developer tasks\n' +
+                  '4: Use company data\n' +
+                  '\'quit\' to exit the program\n')
+            command = input('Enter a number:')
             if command.strip() in function_map:
                 function_map[command](aiClient, azure_oai_model, search_client)
             elif command.strip().lower() == 'quit':
-                print('프로그램을 종료합니다...')
+                print('Exiting program...')
                 break
             else:
-                print("잘못된 입력입니다. 1, 2, 3 또는 4 중 하나를 입력하세요.")
+                print("Invalid input. Please enter number 1, 2, 3, or 4.")
     except Exception as ex:
         print(ex)
 
@@ -84,12 +93,12 @@ if __name__ == '__main__':
 def function1(aiClient, aiModel):
     inputText = utils.getPromptInput("Task 1: Validate PoC", "sample-text.txt")
 
-    # Azure OpenAI 모델에 보낼 메시지 빌드
+    # Build messages to send to Azure OpenAI model
     messages = [
         {"role": "user", "content": inputText}
     ]
 
-    # 인수 목록 정의
+    # Define argument list
     apiParams = {
         "model": aiModel,
         "messages": messages,
@@ -99,12 +108,13 @@ def function1(aiClient, aiModel):
 
     utils.writeLog("API Parameters:\n", apiParams)
 
-    # 채팅 완료 연결 호출
+    # Call chat completion connection
     response = aiClient.chat.completions.create(**apiParams)
 
     utils.writeLog("Response:\n", str(response))
     print("Response: " + response.choices[0].message.content + "\n")
     return response
+
 ```
 ## 작업 2: 회사 챗봇
 설명  
@@ -115,7 +125,7 @@ def function1(aiClient, aiModel):
 def function2(aiClient, aiModel):
     inputText = utils.getPromptInput("Task 2: Company chatbot", "sample-text.txt")
 
-    # Azure OpenAI 모델에 보낼 메시지 빌드
+    # Build messages to send to Azure OpenAI model
     messages = [
         {"role": "system", "content": "You are a helpful assistant who responds in a casual tone."},
         {"role": "user", "content": "Where can I find the company phone number?"},
@@ -123,7 +133,7 @@ def function2(aiClient, aiModel):
         {"role": "user", "content": inputText}
     ]
 
-    # 인수 목록 정의
+    # Define argument list
     apiParams = {
         "model": aiModel,
         "messages": messages,
@@ -133,7 +143,7 @@ def function2(aiClient, aiModel):
 
     utils.writeLog("API Parameters:\n", apiParams)
 
-    # 채팅 완료 연결 호출
+    # Call chat completion connection
     response = aiClient.chat.completions.create(**apiParams)
 
     response_text = response.choices[0].message.content.strip()
@@ -149,7 +159,8 @@ def function2(aiClient, aiModel):
 레거시 코드에 주석을 추가하고 문서를 생성하며, fibonacci.py의 함수에 대한 단위 테스트를 생성하는 함수입니다.  
 
 코드  
-```pythondef function3(aiClient, aiModel):
+```python
+def function3(aiClient, aiModel):
     # Get the task selection from the user
     print('Select task:\n1: Add comments and generate documentation for legacyCode.py\n2: Generate five unit tests for fibonacci.py')
     task = input('Enter the task number (1 or 2): ').strip()
@@ -200,7 +211,6 @@ def function2(aiClient, aiModel):
     print(f"Output written to: {output_file_path}")
 
     return response_text
-
 ```
 
 ## 작업 4: 회사 데이터 사용
